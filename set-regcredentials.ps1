@@ -45,7 +45,6 @@ $credpath=$credpath.replace('\\','\')
 if ($null -eq $credpath){[string]$credpath="HKCU:\Software\Mycredentials\$credname"}
 if ($null -eq $defaultuser){[string]$defaultuser="Username"}
 
-Show-onscreen $("`nLoading includes: $PSScriptRoot\bg-sharedfunctions.ps1") 1
 Try{. "$PSScriptRoot\bg-sharedfunctions.ps1" | Out-Null}
 Catch{
     Write-Warning "I wasn't able to load the sharedfunctions includes (which should live in the same directory as $global:srccmdline). `nWe are going to bail now, sorry 'bout that!"
@@ -54,8 +53,10 @@ Catch{
     BREAK
     }
 
+    $creduser=$($credname+"User")
+    $credpw=$($credname+"PW")
     Add-Type -AssemblyName Microsoft.VisualBasic
     AddRegPath $credpath
-    Get-Set-Credential $credname $credpath $($credname+"User") $($credname+"PW") $false $defaultuser
-    Ver-RegistryValue -RegPath $Path -Name $($credname+"User")
+    Get-Set-Credential $credname $credpath $creduser $credpw $true $defaultuser
+    Ver-RegistryValue -RegPath $Path -Name $creduser
     Get-SecurePassword $Path $($credname+"PW")
