@@ -119,8 +119,8 @@ If(!(test-path $path))
 }
 
 $rpath = "pdrangeid/graph-commit"
-get-updatedgitfile $rpath "set-n4jcredentials.ps1" "$path\set-regcredentials.ps1"
-get-updatedgitfile $rpath "set-n4jcredentials.ps1" "$path\update-modules.ps1"
+get-updatedgitfile $rpath "set-regcredentials.ps1" "$path\set-regcredentials.ps1"
+get-updatedgitfile $rpath "update-modules.ps1" "$path\update-modules.ps1"
 $rpath = "pdrangeid/bnwh-cache-agent"
 get-updatedgitfile $rpath "bg-sharedfunctions.ps1" "$path\bg-sharedfunctions.ps1"
 $rpath = "pdrangeid/n4j-pswrapper"
