@@ -30,6 +30,7 @@ param (
     [string]$credname,
     [string]$credpath,
     [string]$defaultuser,
+    [switch]$n4j,
     [switch]$noui,
     [int]$verbosity
     )
@@ -53,10 +54,47 @@ Catch{
     BREAK
     }
 
+    if ($n4j -eq $true){
+    Write-Host "`nIf this config has been run before (by this user, on this PC), successful settings will be stored in the registry under:"
+    Write-Host "HKEY_CURRENT_USER\Software\neo4j-wrapper\Datasource"
+    Write-Host "`nThe wizard will use those values, and give you a chance to modify them if you need."
+    
+    Write-Host "`nFirst we need to verify that we can load the Neo4j dotnet driver..."
+    $ValName = "N4jDriverpath"
+    $N4jPath = "HKCU:\Software\neo4j-wrapper\Datasource"
+    $Dllpathdef = Ver-RegistryValue -RegPath $N4jPath -Name $ValName -DefValue "C:\Program Files\Neo4jTools\Neo4j.Driver.1.7.2\lib\net452\Neo4j.Driver.dll"
+    if([System.IO.File]::Exists($Dllpathdef)){	$Neo4jdriver =$Dllpathdef }
+    if(![System.IO.File]::Exists($Dllpathdef)){
+        # file with path $N4jPath doesn't exist
+        $Neo4jdriver = Get-FileName $Dllpathdef
+    }
+
+    if (AmINull $($Neo4jdriver) -eq $true){
+        write-host "No Path for Neo4j Driver provided.   Exiting setup...`nFor help loading the neo4j dotnet drivers please visit: https://glennsarti.github.io/blog/using-neo4j-dotnet-client-in-ps/"
+        BREAK
+        }
+    
+    Try{
+    # Import DLLs
+    Add-Type -Path $Neo4jdriver
+    }
+    Catch{
+        LogError $_.Exception "Loading Neo4j drivers." "Could not load Neo4j dlls from $PSScriptRoot.  For help please visit: https://glennsarti.github.io/blog/using-neo4j-dotnet-client-in-ps/ 
+        `n If you've already followed these instructions and are receiving an error, you may need to update your dotnet framework: https://dotnet.microsoft.com/download/dotnet-framework-runtime/net47"
+    BREAK
+    }
+    Set-ItemProperty -Path $path -Name $ValName -Value $Neo4jdriver -Force #| Out-Null
+    Write-Host "Verified Neo4J Driver!"
+
+    } # If $n4j switch is enabled
+    
     $creduser=$($credname+"User")
     $credpw=$($credname+"PW")
     Add-Type -AssemblyName Microsoft.VisualBasic
     AddRegPath $credpath
-    Get-Set-Credential $credname $credpath $creduser $credpw $true $defaultuser
-    Ver-RegistryValue -RegPath $Path -Name $creduser
-    Get-SecurePassword $Path $($credname+"PW")
+    $result = (Get-Set-Credential $credname $credpath $creduser $credpw $true $defaultuser)
+    
+    if ($result -eq $true){
+    Write-Host "$credname stored successfully."
+    }
+    
