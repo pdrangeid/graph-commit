@@ -37,14 +37,18 @@ param (
 
 $scriptname=$($MyInvocation.MyCommand.Name)
 
-if ($noui -and $null -eq $verbosity){[int]$verbosity=0} #noui switch sets output verbosity level to 0 by default
+if ($noui -eq $true -and $null -eq $verbosity){[int]$verbosity=0} #noui switch sets output verbosity level to 0 by default
 if ($null -eq $verbosity){[int]$verbosity=1} #verbosity level is 1 by default
-if (!($null -eq $credpath)){
+if (!([string]::IsNullOrEmpty($credpath))){
 $credpath="HKCU:\Software\$credpath\$credname"
 $credpath=$credpath.replace('\\','\')
 }
-if ($null -eq $credpath){[string]$credpath="HKCU:\Software\Mycredentials\$credname"}
-if ($null -eq $defaultuser){[string]$defaultuser="Username"}
+if ([string]::IsNullOrEmpty($credpath) -and $n4j -eq $true){[string]$credpath="HKCU:\Software\neo4j-wrapper\Datasource"}
+if ([string]::IsNullOrEmpty($credpath)){[string]$credpath="HKCU:\Software\Mycredentials\$credname"}
+if ([string]::IsNullOrEmpty($defaultuser) -and $n4j -eq $true){[string]$defaultuser="neo4j"}
+if ([string]::IsNullOrEmpty($defaultuser)){[string]$defaultuser="Username"}
+
+write-host "early credpath is $credpath"
 
 Try{. "$PSScriptRoot\bg-sharedfunctions.ps1" | Out-Null}
 Catch{
@@ -83,11 +87,42 @@ Catch{
         `n If you've already followed these instructions and are receiving an error, you may need to update your dotnet framework: https://dotnet.microsoft.com/download/dotnet-framework-runtime/net47"
     BREAK
     }
-    Set-ItemProperty -Path $path -Name $ValName -Value $Neo4jdriver -Force #| Out-Null
+    Set-ItemProperty -Path $N4jPath -Name $ValName -Value $Neo4jdriver -Force #| Out-Null
     Write-Host "Verified Neo4J Driver!"
-
-    } # If $n4j switch is enabled
     
+    if ($null -eq $credname){[string]$credname="N4jDataSource"}
+    $ValName = "LastDSName"	
+    AddRegPath $credpath
+    $DSNamedef = Ver-RegistryValue -RegPath $credpath -Name $ValName -DefValue $credname
+    if (AmINull $($DSNamedef.Trim()) -eq $true ){$DSNamedef="N4jDataSource"}
+    Write-Host ""
+    Write-Host "A logical name must be provided for this Neo4j Datasource."
+    $DSName = [Microsoft.VisualBasic.Interaction]::InputBox('Enter name for this Neo4j Datasource.', 'Neo4j Datasource Name', $($DSNamedef))
+    $DSName=$DSName.Trim()
+    if (AmINull $($DSName) -eq $true){
+    write-host "No Datasource name provided.   Exiting setup..."
+    BREAK
+    }
+
+    $ValName = "ServerURL"	
+    #$Path = "HKCU:\Software\neo4j-wrapper\Datasource\$DSName"
+    #AddRegPath $Path
+    $Neo4jServerNamedef = Ver-RegistryValue -RegPath $credpath -Name $ValName -DefValue "bolt://localhost:7687"
+    if (AmINull $($Neo4jServerNamedef.Trim()) -eq $true ){$Neo4jServerNamedef="bolt://localhost:7687"}
+    Write-Host ""
+    Write-Host "Define your Neo4j graphDB. "
+    $Neo4jServerName = [Microsoft.VisualBasic.Interaction]::InputBox('Enter fully qualified (or IP) address of Neo4j Server that will host the graphDB.', 'Neo4j Server URL', $($Neo4jServerNamedef))
+    $Neo4jServerName=$Neo4jServerName.Trim()
+    if (AmINull $($Neo4jServerName) -eq $true){
+    write-host "No Neo4j Server provided.   Exiting setup..."
+    BREAK
+    }
+
+    $credpath = "$credpath\$credname"
+    $credpath=$credpath.replace('\\','\')
+    write-host "credpath is $credpath"
+    } # If $n4j switch is enabled
+
     $creduser=$($credname+"User")
     $credpw=$($credname+"PW")
     Add-Type -AssemblyName Microsoft.VisualBasic
@@ -98,3 +133,18 @@ Catch{
     Write-Host "$credname stored successfully."
     }
     
+    if ($n4j -eq $true){
+
+Try {
+    write-host "Let's test our connection to Neo4j Server $Neo4jServerName."
+    $authToken = [Neo4j.Driver.V1.AuthTokens]::Basic($n4jUser,$n4juPW)
+    $dbDriver = [Neo4j.Driver.V1.GraphDatabase]::Driver($Neo4jServerName,$authToken)
+    $session = $dbDriver.Session()
+    $result = $session.Run("call dbms.components() yield name, versions, edition unwind versions as version return name, version, edition;")
+    $result | fl
+    }
+    Catch{
+        LogError $_.Exception "Loading Neo4j driver." "Could not Load Driver"
+    BREAK
+    }
+}
