@@ -90,11 +90,15 @@ Catch{
     Set-ItemProperty -Path $N4jPath -Name $ValName -Value $Neo4jdriver -Force #| Out-Null
     Write-Host "Verified Neo4J Driver!"
     
-    if ($null -eq $credname){[string]$credname="N4jDataSource"}
+
+    if ($null -eq $credname){[string]$credname="N4jDataSource"
     $ValName = "LastDSName"	
     AddRegPath $credpath
     $DSNamedef = Ver-RegistryValue -RegPath $credpath -Name $ValName -DefValue $credname
     if (AmINull $($DSNamedef.Trim()) -eq $true ){$DSNamedef="N4jDataSource"}
+    }
+    if (![string]::IsNullOrEmpty($credname))  {$DSNamedef=$credname}
+
     Write-Host ""
     Write-Host "A logical name must be provided for this Neo4j Datasource."
     $DSName = [Microsoft.VisualBasic.Interaction]::InputBox('Enter name for this Neo4j Datasource.', 'Neo4j Datasource Name', $($DSNamedef))
