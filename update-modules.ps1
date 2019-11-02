@@ -90,7 +90,7 @@ Function get-updatedgitfile([string]$reponame,[string]$repofile,[string]$localfi
       Write-host $localtest
       
             if ($downloadfile -eq $true) {
-            write-host "Downloading $repofile ($therepofiledate) from https://raw.githubusercontent.com/$reponame/master/$repofile"
+            write-host "Downloading $repofile ($therepofiledate) from https://raw.githubusercontent.com/$reponame/master/$repofile`n"
             $dlurl="https://raw.githubusercontent.com/$reponame/master/$repofile"
             $client = new-object System.Net.WebClient
             Try{
