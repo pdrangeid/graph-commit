@@ -11,11 +11,17 @@
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐ 
 │ update-modules.ps1                                                                          │ 
 ├─────────────────────────────────────────────────────────────────────────────────────────────┤ 
-│   DATE        : 10.12.2019 				               	                                  │ 
-│   AUTHOR      : Paul Drangeid 			                                                  │ 
+│   DATE        : 10.12.2019 				               	                            │ 
+│   AUTHOR      : Paul Drangeid 			                                              │ 
 │   SITE        : https://github.com/pdrangeid/graph-commit                                   │ 
 └─────────────────────────────────────────────────────────────────────────────────────────────┘ 
 #> 
+
+param (
+    [string]$gitrepo,
+    [string]$gitfile,
+    [string]$destpath
+    )
 
 $companyname="Blue Net Inc"
 $reporoot="https://raw.githubusercontent.com/pdrangeid"
@@ -106,6 +112,20 @@ Function get-updatedgitfile([string]$reponame,[string]$repofile,[string]$localfi
             }
       }# End Function get-updatedgitfile
 
+if (![string]::IsNullOrEmpty($gitrepo))  {
+      
+      if ([string]::IsNullOrEmpty($gitfile))  {Write-Host "-gitrepo 'repository path' -gitfile gitfilename.ext must both be specified on the commandline for custom updates."
+       exit}
+      if ([string]::IsNullOrEmpty($destpath))  {$destpath=$PSScriptRoot}
+      
+      If(!(test-path $destpath))
+      {
+            New-Item -ItemType Directory -Force -Path $destpath
+      }
+      
+      get-updatedgitfile $gitrepo "$gitfile" "$destpath\$gitfile"
+      exit
+}
 
 If(!(test-path $path))
 {
