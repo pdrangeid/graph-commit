@@ -94,7 +94,7 @@ Function get-updatedgitfile([string]$reponame,[string]$repofile,[string]$localfi
             $dlurl="https://raw.githubusercontent.com/$reponame/master/$repofile"
             $client = new-object System.Net.WebClient
             Try{
-            Write-Host "Gonna download $dlurl to $localfilename"
+            #Write-Host "Downloading $dlurl to $localfilename"
             $dlresult = $client.DownloadFile($dlurl,$localfilename) 
             }
             Catch{
