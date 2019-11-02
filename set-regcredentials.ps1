@@ -129,6 +129,10 @@ Catch{
 
     $creduser=$($credname+"User")
     $credpw=$($credname+"PW")
+    if ($n4j -eq $true){
+        $creduser=$("DSUser")
+        $credpw=$("DSPW")
+    }
     Add-Type -AssemblyName Microsoft.VisualBasic
     AddRegPath $credpath
     $result = (Get-Set-Credential $credname $credpath $creduser $credpw $true $defaultuser)
@@ -138,17 +142,41 @@ Catch{
     }
     
     if ($n4j -eq $true){
-
-Try {
-    write-host "Let's test our connection to Neo4j Server $Neo4jServerName."
-    $authToken = [Neo4j.Driver.V1.AuthTokens]::Basic($n4jUser,$n4juPW)
-    $dbDriver = [Neo4j.Driver.V1.GraphDatabase]::Driver($Neo4jServerName,$authToken)
-    $session = $dbDriver.Session()
-    $result = $session.Run("call dbms.components() yield name, versions, edition unwind versions as version return name, version, edition;")
-    $result | fl
-    }
-    Catch{
-        LogError $_.Exception "Loading Neo4j driver." "Could not Load Driver"
-    BREAK
-    }
+        Try{
+            $ipaddress=($Neo4JServerName -split "/")[2]
+            $queryport=($ipaddress -split ":")[1]
+            $ipaddress=($ipaddress -split ":")[0]
+            $ipaddress=$(Resolve-DnsName -Type A -Name $ipaddress -ErrorAction Stop).IPAddress
+            }
+            Catch{
+              LogError $_.Exception "Failed address lookup for $Neo4jServerName.  Please verify DNS or verify the server is running.`n"
+            }
+            Try{
+            show-onscreen $("Validating port connectivity for $ipaddress on $queryport") 2
+            $result =  get-portvalidation $ipaddress $queryport
+            show-onscreen $("Port connectivity results: $result`n") 4
+            if ($result -eq $false){
+              LogError $_.Exception "Failed port validation to $Neo4jServerName.  Please verify address and firewall rules.`n"
+              exit
+            }
+            }
+            Catch{
+              LogError $_.Exception "Failed port validation to $Neo4jServerName.  Please verify address and firewall rules.`n"
+            }
+        Try {
+            write-host "Let's test our connection to Neo4j Server $Neo4jServerName."
+            $n4jUser = Ver-RegistryValue -RegPath $credpath -Name $creduser
+            $n4juPW = Get-SecurePassword $credpath $credpw 
+            $authToken = [Neo4j.Driver.V1.AuthTokens]::Basic($n4jUser,$n4juPW)
+            $dbDriver = [Neo4j.Driver.V1.GraphDatabase]::Driver($Neo4jServerName,$authToken)
+            $session = $dbDriver.Session()
+            $result = $session.Run("call dbms.components() yield name, versions, edition unwind versions as version return name, version, edition;")
+            $result | fl
+            Set-ItemProperty -Path $credpath -Name "ServerURL" -Value $Neo4jServerName -Force #| Out-Null
+            Write-Host "Validated Datasource credentials..."
+            }
+            Catch{
+                LogError $_.Exception "Failed to connect to Neo4j Server."
+            BREAK
+            }
 }
