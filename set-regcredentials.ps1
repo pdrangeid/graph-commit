@@ -67,7 +67,7 @@ Catch{
     $ValName = "N4jDriverpath"
     $N4jPath = "HKCU:\Software\neo4j-wrapper\Datasource"
     #$Dllpathdef = Ver-RegistryValue -RegPath $N4jPath -Name $ValName -DefValue "C:\Program Files\Neo4jTools\Neo4j.Driver.1.7.2\lib\net452\Neo4j.Driver.dll"
-    $Dllpathdef = Ver-RegistryValue -RegPath $N4jPath -Name $ValName -DefValue "C:\Program Files\PackageManagement\NuGet\Packages\Neo4j.Driver.1.7.2\lib\netstandard1.3\Neo4j.Driver.dll"
+    $Dllpathdef = Ver-RegistryValue -RegPath $N4jPath -Name $ValName -DefValue "$Env:programfiles\PackageManagement\NuGet\Packages\Neo4j.Driver.1.7.2\lib\netstandard1.3\Neo4j.Driver.dll"
     if([System.IO.File]::Exists($Dllpathdef)){	$Neo4jdriver =$Dllpathdef }
     if(![System.IO.File]::Exists($Dllpathdef)){
         # file with path $N4jPath doesn't exist
@@ -112,6 +112,7 @@ Catch{
 
     Write-Host ""
     Write-Host "A logical name must be provided for this Neo4j Datasource."
+    Add-Type -AssemblyName System.Windows.Forms
     $DSName = [Microsoft.VisualBasic.Interaction]::InputBox('Enter name for this Neo4j Datasource.', 'Neo4j Datasource Name', $($DSNamedef))
     $DSName=$DSName.Trim()
     if (AmINull $($DSName) -eq $true){
