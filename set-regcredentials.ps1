@@ -173,12 +173,14 @@ Catch{
             $result =  get-portvalidation $ipaddress $queryport
             show-onscreen $("Port connectivity results: $result`n") 4
             if ($result -eq $false){
-              LogError $_.Exception "Failed port validation to $Neo4jServerName.  Please verify address and firewall rules.`n"
+                LogError $_.Exception "Failed port validation to $Neo4jServerName.  Please verify address and firewall rules.`n"
+                Write-Host "The easiest way to test Neo4j DB connectivity: open a browser and try to connect to http://yourneo4jserver:7474/browser/"
               exit
             }
             }
             Catch{
               LogError $_.Exception "Failed port validation to $Neo4jServerName.  Please verify address and firewall rules.`n"
+              Write-Host "The easiest way to test Neo4j DB connectivity: open a browser and try to connect to http://yourneo4jserver:7474/browser/"
             }
         Try {
             write-host "Let's test our connection to Neo4j Server $Neo4jServerName."
