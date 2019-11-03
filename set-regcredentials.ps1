@@ -66,7 +66,8 @@ Catch{
     Write-Host "`nFirst we need to verify that we can load the Neo4j dotnet driver..."
     $ValName = "N4jDriverpath"
     $N4jPath = "HKCU:\Software\neo4j-wrapper\Datasource"
-    $Dllpathdef = Ver-RegistryValue -RegPath $N4jPath -Name $ValName -DefValue "C:\Program Files\Neo4jTools\Neo4j.Driver.1.7.2\lib\net452\Neo4j.Driver.dll"
+    #$Dllpathdef = Ver-RegistryValue -RegPath $N4jPath -Name $ValName -DefValue "C:\Program Files\Neo4jTools\Neo4j.Driver.1.7.2\lib\net452\Neo4j.Driver.dll"
+    $Dllpathdef = Ver-RegistryValue -RegPath $N4jPath -Name $ValName -DefValue "C:\Program Files\PackageManagement\NuGet\Packages\Neo4j.Driver.1.7.2\lib\netstandard1.3\Neo4j.Driver.dll"
     if([System.IO.File]::Exists($Dllpathdef)){	$Neo4jdriver =$Dllpathdef }
     if(![System.IO.File]::Exists($Dllpathdef)){
         # file with path $N4jPath doesn't exist
@@ -74,6 +75,14 @@ Catch{
     }
 
     if (AmINull $($Neo4jdriver) -eq $true){
+        $downloadn4jdriver=YesorNo $("We couldn't find the Neo4j DotNET driver. Can I install it for you"+"?") "Neo4j DotNET Driver required."
+        if ($download4jdriver -eq $false){
+            BREAK
+        }
+        if ($download4jdriver -eq $true){
+            $result=get-n4jdriver
+                    }
+
         write-host "No Path for Neo4j Driver provided.   Exiting setup...`nFor help loading the neo4j dotnet drivers please visit: https://glennsarti.github.io/blog/using-neo4j-dotnet-client-in-ps/"
         BREAK
         }
