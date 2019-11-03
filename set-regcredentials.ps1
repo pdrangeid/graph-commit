@@ -112,7 +112,7 @@ Catch{
 
     Write-Host ""
     Write-Host "A logical name must be provided for this Neo4j Datasource."
-    Add-Type -AssemblyName Microsoft.VisualBasic
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
     $DSName = [Microsoft.VisualBasic.Interaction]::InputBox('Enter name for this Neo4j Datasource.', 'Neo4j Datasource Name', $($DSNamedef))
     $DSName=$DSName.Trim()
     if (AmINull $($DSName) -eq $true){
