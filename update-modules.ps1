@@ -24,9 +24,8 @@ param (
     )
 
 $companyname="Blue Net Inc"
-$reporoot="https://raw.githubusercontent.com/pdrangeid"
 $path = $("$Env:Programfiles\$companyname")
-$localtz=Get-TimeZone | Select Id -ExpandProperty Id
+$localtz=Get-TimeZone | Select-Object Id -ExpandProperty Id
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 function ConvertUTC {
@@ -95,7 +94,7 @@ Function get-updatedgitfile([string]$reponame,[string]$repofile,[string]$localfi
             $client = new-object System.Net.WebClient
             Try{
             #Write-Host "Downloading $dlurl to $localfilename"
-            $dlresult = $client.DownloadFile($dlurl,$localfilename) 
+            $client.DownloadFile($dlurl,$localfilename) 
             }
             Catch{
             $ErrorMessage = $_.Exception.Message
@@ -108,7 +107,7 @@ Function get-updatedgitfile([string]$reponame,[string]$repofile,[string]$localfi
       
             $localtimestamp = ConvertUTCtoLocal $therepofiledate | get-date
             #Convert the UTC of the repo file to the localtime, then set the local file's lastmodified property to the proper timestamp
-            Get-ChildItem  $localfilename | % {$_.LastWriteTime = $localtimestamp}
+            Get-ChildItem  $localfilename | ForEach-Object {$_.LastWriteTime = $localtimestamp}
             }
       }# End Function get-updatedgitfile
 
@@ -145,7 +144,6 @@ $rpath = "pdrangeid/bnwh-cache-agent"
 get-updatedgitfile $rpath "bg-sharedfunctions.ps1" "$path\bg-sharedfunctions.ps1"
 $rpath = "pdrangeid/n4j-pswrapper"
 get-updatedgitfile $rpath "get-cypher-results.ps1" "$path\get-cypher-results.ps1"
-
 
 exit
 

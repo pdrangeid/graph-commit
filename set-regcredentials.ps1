@@ -76,7 +76,7 @@ Catch{
     }
 
     if (AmINull $($Neo4jdriver) -eq $true){
-        $downloadn4jdriver=YesorNo $("We couldn't find the Neo4j DotNET driver.  Would you like me to install it for you"+"?") "Neo4j DotNET Driver required."
+        $downloadn4jdriver=YesorNo $("We couldn't find the Neo4j DotNET driver. Would you like me to install it for you"+"?") "Neo4j DotNET Driver required."
         if ($downloadn4jdriver -eq $false){
             write-host "No Path for Neo4j Driver provided.   Exiting setup...`nFor help loading the neo4j dotnet drivers please visit: https://glennsarti.github.io/blog/using-neo4j-dotnet-client-in-ps/"
             exit
