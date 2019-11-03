@@ -75,12 +75,14 @@ Catch{
     }
 
     if (AmINull $($Neo4jdriver) -eq $true){
-        $downloadn4jdriver=YesorNo $("We couldn't find the Neo4j DotNET driver. Can I install it for you"+"?") "Neo4j DotNET Driver required."
+        $downloadn4jdriver=YesorNo $("We couldn't find the Neo4j DotNET driver. May I install it for you"+"?") "Neo4j DotNET Driver required."
         if ($download4jdriver -eq $false){
             BREAK
         }
         if ($download4jdriver -eq $true){
             $result=get-n4jdriver
+            $Dllpathdef = Ver-RegistryValue -RegPath $N4jPath -Name $ValName -DefValue "C:\Program Files\PackageManagement\NuGet\Packages\Neo4j.Driver.1.7.2\lib\netstandard1.3\Neo4j.Driver.dll"
+            if([System.IO.File]::Exists($Dllpathdef)){$Neo4jdriver=$Dllpathdef}
                     }
 
         write-host "No Path for Neo4j Driver provided.   Exiting setup...`nFor help loading the neo4j dotnet drivers please visit: https://glennsarti.github.io/blog/using-neo4j-dotnet-client-in-ps/"
