@@ -68,26 +68,31 @@ Catch{
     $N4jPath = "HKCU:\Software\neo4j-wrapper\Datasource"
     #$Dllpathdef = Ver-RegistryValue -RegPath $N4jPath -Name $ValName -DefValue "C:\Program Files\Neo4jTools\Neo4j.Driver.1.7.2\lib\net452\Neo4j.Driver.dll"
     $Dllpathdef = Ver-RegistryValue -RegPath $N4jPath -Name $ValName -DefValue "$Env:programfiles\PackageManagement\NuGet\Packages\Neo4j.Driver.1.7.2\lib\netstandard1.3\Neo4j.Driver.dll"
-    if([System.IO.File]::Exists($Dllpathdef)){	$Neo4jdriver =$Dllpathdef }
+    if([System.IO.File]::Exists($Dllpathdef)){$Neo4jdriver =$Dllpathdef}
     if(![System.IO.File]::Exists($Dllpathdef)){
         # file with path $N4jPath doesn't exist
-        $Neo4jdriver = Get-FileName $Dllpathdef
+        $browser4jdriver=YesorNo $("If you've already installed the Neo4j DotNET driver click Yes to manually browse to the lcoation.  If you select 'No' the following prompt will give the option to install it for you.") "Could not locate (Neo4j.Driver.dll required)"
+        if ($browser4jdriver -eq $true){$Neo4jdriver = Get-FileName $Dllpathdef}
     }
 
     if (AmINull $($Neo4jdriver) -eq $true){
-        $downloadn4jdriver=YesorNo $("We couldn't find the Neo4j DotNET driver. May I install it for you"+"?") "Neo4j DotNET Driver required."
-        if ($download4jdriver -eq $false){
-            BREAK
+        $downloadn4jdriver=YesorNo $("We couldn't find the Neo4j DotNET driver.  Would you like me to install it for you"+"?") "Neo4j DotNET Driver required."
+        if ($downloadn4jdriver -eq $false){
+            write-host "No Path for Neo4j Driver provided.   Exiting setup...`nFor help loading the neo4j dotnet drivers please visit: https://glennsarti.github.io/blog/using-neo4j-dotnet-client-in-ps/"
+            exit
         }
-        if ($download4jdriver -eq $true){
-            $result=get-n4jdriver
-            $Dllpathdef = Ver-RegistryValue -RegPath $N4jPath -Name $ValName -DefValue "C:\Program Files\PackageManagement\NuGet\Packages\Neo4j.Driver.1.7.2\lib\netstandard1.3\Neo4j.Driver.dll"
+        if ($downloadn4jdriver -eq $true){
+            Get-N4jdriver
+            $Dllpathdef = Ver-RegistryValue -RegPath $N4jPath -Name $ValName -DefValue "$Env:programfiles\PackageManagement\NuGet\Packages\Neo4j.Driver.1.7.2\lib\netstandard1.3\Neo4j.Driver.dll"
             if([System.IO.File]::Exists($Dllpathdef)){$Neo4jdriver=$Dllpathdef}
+            if([System.IO.File]::Exists($Dllpathdef)){$Neo4jdriver =$Dllpathdef}
                     }
-
+    }#End (is the neo4jdriver value null?)
+        
+    if (AmINull $($Neo4jdriver) -eq $true){
         write-host "No Path for Neo4j Driver provided.   Exiting setup...`nFor help loading the neo4j dotnet drivers please visit: https://glennsarti.github.io/blog/using-neo4j-dotnet-client-in-ps/"
         BREAK
-        }
+    }    
     
     Try{
     # Import DLLs
@@ -183,7 +188,7 @@ Catch{
             $dbDriver = [Neo4j.Driver.V1.GraphDatabase]::Driver($Neo4jServerName,$authToken)
             $session = $dbDriver.Session()
             $result = $session.Run("call dbms.components() yield name, versions, edition unwind versions as version return name, version, edition;")
-            $result | fl
+            $result | Format-List
             Set-ItemProperty -Path $credpath -Name "ServerURL" -Value $Neo4jServerName -Force #| Out-Null
             Write-Host "Validated Datasource credentials..."
             }
