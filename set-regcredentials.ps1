@@ -85,7 +85,7 @@ Catch{
             Get-N4jdriver
             $Dllpathdef = Ver-RegistryValue -RegPath $N4jPath -Name $ValName -DefValue "$Env:programfiles\PackageManagement\NuGet\Packages\Neo4j.Driver.1.7.2\lib\netstandard1.3\Neo4j.Driver.dll"
             if([System.IO.File]::Exists($Dllpathdef)){$Neo4jdriver=$Dllpathdef}
-            if([System.IO.File]::Exists($Dllpathdef)){$Neo4jdriver =$Dllpathdef}
+            if([System.IO.File]::Exists($Dllpathdef)){$Neo4jdriver=$Dllpathdef}
                     }
     }#End (is the neo4jdriver value null?)
         
@@ -192,6 +192,9 @@ Catch{
             $result = $session.Run("call dbms.components() yield name, versions, edition unwind versions as version return name, version, edition;")
             $result | Format-List
             Set-ItemProperty -Path $credpath -Name "ServerURL" -Value $Neo4jServerName -Force #| Out-Null
+            $session=$null
+            $dbDriver=$null
+            $authToken=$null
             Write-Host "Validated Datasource credentials..."
             }
             Catch{
