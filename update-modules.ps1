@@ -71,6 +71,7 @@ Function get-updatedgitfile([string]$reponame,[string]$repofile,[string]$localfi
             $lastModifiedDate = (Get-Item $localfilename).LastWriteTime | get-date -Format "yyyy-MM-ddTHH:mm:ss"
             $localfiletime = ConvertUTC $lastModifiedDate $localtz
       if ($localfiletime -ge $therepofiledate){
+           Write-Host "$localfilename is already present and up-to-date"
       }#end if (local file exists, and is the same or newer datestamp than that of the repository)
       else {
             write-host "$repofile will be updated..."
@@ -105,7 +106,6 @@ Function get-updatedgitfile([string]$reponame,[string]$repofile,[string]$localfi
             write-host "the error is "$error[0].Exception.ToString()
             }
             }# End Download was True
-            if ($downloadfile -ne $true) {Write-Host "$localfilename is alread present and up-to-date"}
       }# End Function get-updatedgitfile
 
 if (![string]::IsNullOrEmpty($gitrepo))  {      
