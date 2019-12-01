@@ -11,7 +11,7 @@
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐ 
 │ update-modules.ps1                                                                          │ 
 ├─────────────────────────────────────────────────────────────────────────────────────────────┤ 
-│   DATE        : 10.12.2019 				               	                            │ 
+│   DATE        : 11.06.2019 				               	                            │ 
 │   AUTHOR      : Paul Drangeid 			                                              │ 
 │   SITE        : https://github.com/pdrangeid/graph-commit                                   │ 
 └─────────────────────────────────────────────────────────────────────────────────────────────┘ 
@@ -140,9 +140,7 @@ If(!(test-path $path))
 $rpath = "pdrangeid/graph-commit"
 get-updatedgitfile $rpath "set-regcredentials.ps1" "$path\set-regcredentials.ps1"
 get-updatedgitfile $rpath "update-modules.ps1" "$path\update-modules.ps1"
-$rpath = "pdrangeid/bnwh-cache-agent"
 get-updatedgitfile $rpath "bg-sharedfunctions.ps1" "$path\bg-sharedfunctions.ps1"
-$rpath = "pdrangeid/n4j-pswrapper"
 get-updatedgitfile $rpath "get-cypher-results.ps1" "$path\get-cypher-results.ps1"
 
 exit
