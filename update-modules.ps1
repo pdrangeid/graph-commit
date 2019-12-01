@@ -5,6 +5,7 @@
  
 .DESCRIPTION 
  Setup and maintain agent scripts with latest version from the git repository.
+ If you provide no commandline options it checks for updates for the core graph-commit scripts.
  
 
 .NOTES 
