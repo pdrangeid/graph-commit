@@ -104,8 +104,8 @@ Function get-updatedgitfile([string]$reponame,[string]$repofile,[string]$localfi
             Write-Host $FailedItem
             write-host "the error is "$error[0].Exception.ToString()
             }
-            if ($downloadfile -ne $true) {Write-Host "$localfilename is alread present and up-to-date"}
             }# End Download was True
+            if ($downloadfile -ne $true) {Write-Host "$localfilename is alread present and up-to-date"}
       }# End Function get-updatedgitfile
 
 if (![string]::IsNullOrEmpty($gitrepo))  {      
