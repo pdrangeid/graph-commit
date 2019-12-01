@@ -34,8 +34,6 @@ param($time, $fromTimeZone)
   $utc = [System.TimeZoneInfo]::ConvertTimeToUtc($time, $oFromTimeZone)
   return $utc
 } # End ConvertUTC
-
-
 function ConvertUTCtoLocal{
 param([String] $UTCTime)
 $strCurrentTimeZone = (Get-WmiObject win32_timezone).StandardName
@@ -43,7 +41,6 @@ $TZ = [System.TimeZoneInfo]::FindSystemTimeZoneById($strCurrentTimeZone)
 $LocalTime = [System.TimeZoneInfo]::ConvertTimeFromUtc($UTCTime, $TZ)
 return $LocalTime
 } # End ConvertUTCtoLocal
-
 Function get-updatedgitfile([string]$reponame,[string]$repofile,[string]$localfilename){
       # This function will query github API at the provided $reponame and $repofile and download if the $localfilename is older or missing.
       # NOTE: unauthentication API queries to github (like this one) are rate-limited to 60 per hour (per IP address)
@@ -68,7 +65,7 @@ Function get-updatedgitfile([string]$reponame,[string]$repofile,[string]$localfi
             write-host "Error Message $ErrorMessage `nFailed Item:$_.Exception.ItemName `nhttp Response:$_.Exception.Response`n"
                   return $false
       }
-      #Get the date of the last commit for the repository file requested.
+      #Get the date of the last commit for the repository file requested.  WE assume the repository is storing in UTC stamps.
       [datetime]$therepofiledate=$Restresult.commit[0].author.date | get-date -Format "yyyy-MM-ddTHH:mm:ss"
       If (Test-Path -path $localfilename) {
             $lastModifiedDate = (Get-Item $localfilename).LastWriteTime | get-date -Format "yyyy-MM-ddTHH:mm:ss"
@@ -79,7 +76,6 @@ Function get-updatedgitfile([string]$reponame,[string]$repofile,[string]$localfi
             write-host "$repofile will be updated..."
             $downloadfile=$true
       }#end else (file exists, but is older than the one in the repository)
-      
       }#end if (the file DOES exists in the expected local path)
 
       else {
@@ -95,6 +91,10 @@ Function get-updatedgitfile([string]$reponame,[string]$repofile,[string]$localfi
             Try{
             #Write-Host "Downloading $dlurl to $localfilename"
             $client.DownloadFile($dlurl,$localfilename) 
+            $localtimestamp = ConvertUTCtoLocal $therepofiledate | get-date
+            #Convert the UTC of the repo file to the localtime, then set the local file's lastmodified property to the proper timestamp
+            Get-ChildItem  $localfilename | ForEach-Object {$_.LastWriteTime = $localtimestamp}
+
             }
             Catch{
             $ErrorMessage = $_.Exception.Message
@@ -104,15 +104,11 @@ Function get-updatedgitfile([string]$reponame,[string]$repofile,[string]$localfi
             Write-Host $FailedItem
             write-host "the error is "$error[0].Exception.ToString()
             }
-      
-            $localtimestamp = ConvertUTCtoLocal $therepofiledate | get-date
-            #Convert the UTC of the repo file to the localtime, then set the local file's lastmodified property to the proper timestamp
-            Get-ChildItem  $localfilename | ForEach-Object {$_.LastWriteTime = $localtimestamp}
-            }
+            if ($downloadfile -ne $true) {Write-Host "$localfilename is alread present and up-to-date"}
+            }# End Download was True
       }# End Function get-updatedgitfile
 
-if (![string]::IsNullOrEmpty($gitrepo))  {
-      
+if (![string]::IsNullOrEmpty($gitrepo))  {      
       if ([string]::IsNullOrEmpty($gitfile))  {Write-Host "-gitrepo 'repository path' -gitfile gitfilename.ext must both be specified on the commandline for custom updates."
        exit}
       if ([string]::IsNullOrEmpty($destpath))  {$destpath=$PSScriptRoot}
@@ -121,7 +117,6 @@ if (![string]::IsNullOrEmpty($gitrepo))  {
       {
             New-Item -ItemType Directory -Force -Path $destpath
       }
-      
       get-updatedgitfile $gitrepo "$gitfile" "$destpath\$gitfile"
       exit
 }
@@ -130,7 +125,6 @@ If(!(test-path $path))
 {
       New-Item -ItemType Directory -Force -Path $path
 }
-
 $path = $("$Env:Programfiles\$companyname\Graph-Commit")
 If(!(test-path $path))
 {
@@ -144,4 +138,3 @@ get-updatedgitfile $rpath "bg-sharedfunctions.ps1" "$path\bg-sharedfunctions.ps1
 get-updatedgitfile $rpath "get-cypher-results.ps1" "$path\get-cypher-results.ps1"
 
 exit
-
