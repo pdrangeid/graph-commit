@@ -357,7 +357,7 @@ Function Loadn4jdriver {
     $ValName = "N4jDriverpath"
     $Path = "HKCU:\Software\neo4j-wrapper\Datasource"
     $Neo4jdriver = Ver-RegistryValue -RegPath $Path -Name $ValName
-    write-host "Loading Neo4J Driver: $Neo4jdriver"
+    show-OnScreen $("Loading Neo4J Driver: $Neo4jdriver") 1
     if (AmINull $($Neo4jdriver) -eq $true){
         write-host "No Path for Neo4j Driver provided.   Exiting setup...`nFor help loading the neo4j dotnet drivers please visit: https://glennsarti.github.io/blog/using-neo4j-dotnet-client-in-ps/"
         BREAK

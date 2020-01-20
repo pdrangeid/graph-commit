@@ -188,7 +188,7 @@ foreach ($info in $findrepjson.PSObject.Properties) {
     $n4juPW = Get-SecurePassword $Path "DSPW"  
 
     Try {
-        write-host "Connecting to Neo4j logging server: " $($Neo4jServerName) "..."
+        Show-OnScreen $("Connecting to Neo4j logging server: " $($Neo4jServerName) "...") 2
         $authToken = [Neo4j.Driver.V1.AuthTokens]::Basic($n4jUser,$n4juPW)
         $dbDriver = [Neo4j.Driver.V1.GraphDatabase]::Driver($Neo4jServerName,$authToken)
         $logsession = $dbDriver.Session()
