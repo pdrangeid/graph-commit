@@ -365,7 +365,7 @@ Function Loadn4jdriver {
 
     Try{
     # Import DLLs
-    Add-Type -Path $Neo4jdriver
+    Add-Type -Path $Neo4jdriver | Out-Null
     }
     Catch{
         LogError $_.Exception "Loading Neo4j drivers." "Could not load Neo4j dlls from $Neo4jdriver.`nFor help please visit: https://glennsarti.github.io/blog/using-neo4j-dotnet-client-in-ps/ 
