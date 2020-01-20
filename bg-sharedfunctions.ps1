@@ -353,7 +353,7 @@ return $GUID
 }
 
 Function Loadn4jdriver {
-    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic") | Out-Null
     $ValName = "N4jDriverpath"
     $Path = "HKCU:\Software\neo4j-wrapper\Datasource"
     $Neo4jdriver = Ver-RegistryValue -RegPath $Path -Name $ValName

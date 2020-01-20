@@ -261,7 +261,7 @@ $vt=(($securetransaction -split '\r?\n' | Select-String -Pattern '^(?!//).+' | S
 if ($vt -eq 0) {write-host "Transaction in section ["$sectiontitle"] contains only comments or blank lines - not running transaction "($txcounter+1)"/"($cypherarray.GetUpperBound(0)+1) -ForegroundColor Yellow
 continue
 }
-    if ($verbosity -ge 1){}
+    if ($verbosity -ge 1){
     Write-Host -NoNewLine "`rExecuting transaction "(($global:txcounter)+1)"/"($cypherarray.GetUpperBound(0)+1) -ForegroundColor Green
 }
     $result = $session.Run($securetransaction)
